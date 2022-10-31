@@ -124,21 +124,31 @@
             <label for="username">Username:</label>
             <input id="username" name="username">
           </div>
+          <input type="submit" value="Follow">
         </form>
 
         <form id="vote">
           <h3>Vote</h3>
           <div>
+            <label for="id">ID:</label>
+            <input id="id" name="id">
+          </div>
+          <div>
             <label for="vote">Vote:</label>
             <select id="vote" name="vote">
               <option value="upvote">Upvote</option>
-              <option value="downvote">downvote</option>
+              <option value="downvote">Downvote</option>
             </select>
+            <input type="submit" value="Submit">
           </div>
         </form>
 
         <form id="report">
           <h3>Report</h3>
+          <div>
+            <label for="id">ID:</label>
+            <input id="id" name="id">
+          </div>
           <div>
             <label for="report">Report:</label>
             <select id="report" name="report">
@@ -146,17 +156,23 @@
               <option value="misinformation">Misinformation</option>
               <option value="triggering">Triggering</option>
             </select>
+            <input type="submit" value="Report">
           </div>
         </form>
 
         <form id="audit-vote">
-          <h3>Report</h3>
+          <h3>Audit Vote</h3>
+          <div>
+            <label for="id">ID:</label>
+            <input id="id" name="id">
+          </div>
           <div>
             <label for="auditVote">Vote:</label>
             <select id="auditVote" name="auditVote">
               <option value="true">Yes</option>
               <option value="false">No</option>
             </select>
+            <input type="submit" value="Confirm Audit">
           </div>
         </form>
 
@@ -169,6 +185,7 @@
               <option value="verified">No</option>
               <option value="discovery">No</option>
             </select>
+            <input type="submit" value="Choose Tab">
 
             <label for="sortType">Sort Type:</label>
             <select id="sortType" name="sortType">
@@ -177,6 +194,7 @@
               <option value="rising">Rising</option>
               <option value="new">New</option>
             </select>
+            <input type="submit" value="Sort">
           </div>
         </form>
       </div>
