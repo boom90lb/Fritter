@@ -19,9 +19,14 @@ class UserCollection {
    * @return {Promise<HydratedDocument<User>>} - The newly created user
    */
   static async addOne(username: string, password: string): Promise<HydratedDocument<User>> {
-    const dateJoined = new Date();
+    const dateJoined: Date = new Date();
+    const follows: Array<Types.ObjectId> = new Array();
+    const followers: Array<Types.ObjectId> = new Array();
+    const votes: Map<Types.ObjectId, string> = new Map();
+    const reports: Map<Types.ObjectId, string> = new Map();
+    let verified: boolean = false;
 
-    const user = new UserModel({username, password, dateJoined});
+    const user = new UserModel({username, password, dateJoined, follows, followers, votes, reports, verified});
     await user.save(); // Saves user to MongoDB
     return user;
   }
@@ -58,6 +63,24 @@ class UserCollection {
       username: new RegExp(`^${username.trim()}$`, 'i'),
       password
     });
+  }
+
+  static async follow(userId: Types.ObjectId | string, followId: Types.ObjectId | string): Promise<number> {
+    const user = await UserModel.findOne({_id: userId});
+    const following = await UserModel.findOne({_id: followId});
+
+    // user is already following, unfollow
+    if(user.follows.find(user => user === following._id)) {
+      UserModel.updateOne({user: userId}, {$pull: {follows: following._id}});
+      UserModel.updateOne({following: followId}, {$pull: {following: user._id}});
+      return 0;
+    }
+    // user doesn't follow yet, add to follows
+    else{
+      UserModel.updateOne({user: userId}, {$addToSet: {follows: following._id}});
+      UserModel.updateOne({following: followId}, {$addToSet: {following: user._id}});
+      return 1;
+    }
   }
 
   /**

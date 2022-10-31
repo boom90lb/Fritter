@@ -131,4 +131,98 @@ router.put(
   }
 );
 
+/**
+ * Get freets by tabType and sortType.
+ *
+ * @name GET /api/freets?tabType=type
+ *
+ * @return {FreetResponse[]} - An array of freets to display in feed
+ */
+ router.get(
+  '/',
+  async (req: Request, res: Response, next: NextFunction) => {
+    // Check if authorId query parameter was supplied
+    if (req.query.tabType !== undefined) {
+      next();
+      return;
+    }
+
+    const matchingFreets = await FreetCollection.chooseTab(req.query.userId as string, req.query.tabType as string, req.query.sortType="hot" as string);
+    const response = matchingFreets.map(util.constructFreetResponse);
+    res.status(200).json(response);
+  }
+);
+
+/**
+ * Vote on a freet
+ *
+ * @name PUT /api/freets/:id
+ *
+ * @param {string} voteType - upvote or downvote
+ * @return {FreetResponse} - the updated freet
+ * @throws {403} - if the user is not logged in
+ * @throws {404} - if the freetId is not valid
+ */
+ router.put(
+  '/:freetId?',
+  [
+    userValidator.isUserLoggedIn,
+    freetValidator.isFreetExists
+  ],
+  async (req: Request, res: Response) => {
+    await FreetCollection.vote(req.params.freetId, req.params.userId, req.params.voteType);
+    res.status(200).json({
+      message: 'Your vote has been recorded.'
+    });
+  }
+);
+
+/**
+ * Report a freet
+ *
+ * @name PUT /api/freets/:id
+ *
+ * @param {string} freetId - id of freet
+ * @param {string} reportType - 'spam' or 'triggering' or 'misinformation' report
+ * @throws {403} - if the user is not logged in
+ * @throws {404} - if the freetId is not valid
+ */
+ router.put(
+  '/:freetId?',
+  [
+    userValidator.isUserLoggedIn,
+    freetValidator.isFreetExists
+  ],
+  async (req: Request, res: Response) => {
+    await FreetCollection.report(req.params.freetId, req.params.reportType);
+    res.status(200).json({
+      message: 'Your report has been recorded.'
+    });
+  }
+);
+
+/**
+ * Report a freet
+ *
+ * @name PUT /api/freets/:id
+ *
+ * @param {string} freetId - id of freet
+ * @param {string} confirm - confirm if freet should be moderated
+ * @throws {403} - if the user is not logged in
+ * @throws {404} - if the freetId is not valid
+ */
+ router.put(
+  '/:freetId?',
+  [
+    userValidator.isUserLoggedIn,
+    freetValidator.isFreetExists
+  ],
+  async (req: Request, res: Response) => {
+    await FreetCollection.auditVote(req.params.freetId, req.params.confirm == 'true' ? true : false);
+    res.status(200).json({
+      message: 'Your audit vote has been recorded.'
+    });
+  }
+);
+
 export {router as freetRouter};

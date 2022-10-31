@@ -4,6 +4,7 @@ import FreetCollection from '../freet/collection';
 import UserCollection from './collection';
 import * as userValidator from '../user/middleware';
 import * as util from './util';
+import UserModel from './model';
 
 const router = express.Router();
 
@@ -144,6 +145,39 @@ router.delete(
     req.session.userId = undefined;
     res.status(200).json({
       message: 'Your account has been deleted successfully.'
+    });
+  }
+);
+
+/**
+ * Add a follower.
+ *
+ * @name PUT /api/users
+ *
+ * @param {string} userId - The users ID
+ * @param {string} followId - the user to be followed ID
+ * @throws {403} - If user is not logged in
+ */
+ router.put(
+  '/',
+  [
+    userValidator.isUserLoggedIn,
+    userValidator.isUsernameExists
+  ],
+  async (req: Request, res: Response) => {
+    const userId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
+    const followId = (req.query.followId as string) ?? '';
+    let response: string | number = await UserCollection.follow(userId, followId);
+
+    if (response === 0) {
+      response = "followed";
+    }
+
+    if (response === 1) {
+      response = "unfollowed";
+    }
+    res.status(200).json({
+      message: `You have ${response} ${followId}`
     });
   }
 );

@@ -1,4 +1,5 @@
 import type {HydratedDocument} from 'mongoose';
+import type {Types} from 'mongoose';
 import moment from 'moment';
 import type {User} from './model';
 
@@ -7,6 +8,11 @@ type UserResponse = {
   _id: string;
   username: string;
   dateJoined: string;
+  follows: Array<Types.ObjectId>;
+  followers: Array<Types.ObjectId>;
+  votes: Map<Types.ObjectId, string>;
+  reports: Map<Types.ObjectId, string>;
+  verified: boolean;
 };
 
 /**

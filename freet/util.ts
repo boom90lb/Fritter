@@ -9,6 +9,15 @@ type FreetResponse = {
   dateCreated: string;
   content: string;
   dateModified: string;
+
+  //voting and moderation attributes
+  votes: Array<number>;
+  reports: Map<string, number>;
+  flag: boolean;
+  status: string;
+  audit: string;
+  auditInfo: Map<string, number>;
+  cover: string;
 };
 
 /**

@@ -102,6 +102,26 @@ const isUsernameNotAlreadyInUse = async (req: Request, res: Response, next: Next
 };
 
 /**
+ * Checks if a username in req.body exists
+ */
+ const isUsernameExists = async (req: Request, res: Response, next: NextFunction) => {
+  const user = await UserCollection.findOneByUsername(req.query.followId as string);
+
+  // If the current session user wants to change their username to one which matches
+  // the current one irrespective of the case, we should allow them to do so
+  if (user) {
+    next();
+    return;
+  }
+
+  res.status(409).json({
+    error: {
+      username: 'This account does not exist.'
+    }
+  });
+};
+
+/**
  * Checks if the user is logged in, that is, whether the userId is set in session
  */
 const isUserLoggedIn = (req: Request, res: Response, next: NextFunction) => {
@@ -159,6 +179,7 @@ export {
   isUserLoggedOut,
   isUsernameNotAlreadyInUse,
   isAccountExists,
+  isUsernameExists,
   isAuthorExists,
   isValidUsername,
   isValidPassword

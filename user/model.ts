@@ -1,4 +1,4 @@
-import type {Types} from 'mongoose';
+import type {TypeExpressionOperator, Types} from 'mongoose';
 import {Schema, model} from 'mongoose';
 
 /**
@@ -12,6 +12,11 @@ export type User = {
   username: string;
   password: string;
   dateJoined: Date;
+  follows: Array<Types.ObjectId>;
+  followers: Array<Types.ObjectId>;
+  votes: Map<Types.ObjectId, string>;
+  reports: Map<Types.ObjectId, string>;
+  verified: boolean
 };
 
 // Mongoose schema definition for interfacing with a MongoDB table
@@ -31,6 +36,42 @@ const UserSchema = new Schema({
   // The date the user joined
   dateJoined: {
     type: Date,
+    required: true
+  },
+  // All users that the user is following
+  follows: [{
+    type: String,
+    required: false
+  }],
+  // All users that follow the user
+  followers: [{
+    type: String,
+    required: false
+  }],
+  // All freet votes that the user has made
+  votes: [{
+    freetId: {
+      type: String,
+      required: false
+    },
+    voteType: {
+      type: String,
+      required: false
+    }
+  }],
+  // All freet reports that the user has made
+  reports: [{
+    freetId: {
+      type: String,
+      required: false
+    },
+    reportType: {
+      type: String,
+      required: false
+    }
+  }],
+  verified: {
+    type: Boolean,
     required: true
   }
 });

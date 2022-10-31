@@ -38,3 +38,9 @@ function signOut() {
     .then(showResponse)
     .catch(showResponse);
 }
+
+function follow(fields) {
+  fetch('/api/users', {method: 'PUT', body: JSON.stringify(fields), headers: {'Content-Type': 'application/json'}})
+    .then(showResponse)
+    .catch(showResponse);
+}

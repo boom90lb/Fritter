@@ -14,6 +14,17 @@ export type Freet = {
   dateCreated: Date;
   content: string;
   dateModified: Date;
+
+  // Voting and moderation attributes
+  votes: Array<number>;
+  reports: Map<string, number>;
+  flag: boolean;
+  status: string;
+  audit: string;
+  auditInfo: Map<string, number>;
+  cover: string;
+
+  // Tabs and feed attributes
 };
 
 export type PopulatedFreet = {
@@ -22,6 +33,15 @@ export type PopulatedFreet = {
   dateCreated: Date;
   content: string;
   dateModified: Date;
+    
+  // Voting and moderation attributes
+  votes: Array<number>;
+  reports: Map<string, number>;
+  flag: boolean;
+  status: string;
+  audit: string;
+  auditInfo: Map<string, number>;
+  cover: string;
 };
 
 // Mongoose schema definition for interfacing with a MongoDB table
@@ -48,6 +68,40 @@ const FreetSchema = new Schema<Freet>({
   // The date the freet was modified
   dateModified: {
     type: Date,
+    required: true
+  },
+  // The upvotes (index 0) and downvotes (index 1) of the freet
+  votes: [{
+    type: Number,
+    required: true
+  }],
+  // Reports, index 0 == spam, index 1 == misleading, index 2 == offensive
+  reports: [{
+    type: Number,
+    required: true
+  }],
+  // If dislikes > likes, flag is true, marking as controversial
+  flag: {
+    type: Boolean,
+    required: true
+  },
+  // Type of post, “good” or “misinformation” or “triggering” or “spam”
+  status: {
+    type: String,
+    required:true
+  },
+  // Audit status, “none” or “testing” or “passed” or “failed”
+  audit: {
+    type: String,
+    required: true
+  },
+  // Votes for audit, index 0 == vote to remove, index 1 == vote to keep, index 2 == ms since start
+  auditInfo: [{
+    type: Number,
+    required: true
+  }],
+  cover: {
+    type: String,
     required: true
   }
 });
