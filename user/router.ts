@@ -150,16 +150,20 @@ router.delete(
 );
 
 /**
- * Add a follower.
+ * NEW QUERIES
+ */
+
+/**
+ * Add/remove a follower.
  *
- * @name PUT /api/users
+ * @name PUT /api/users/changefollow
  *
  * @param {string} userId - The users ID
  * @param {string} followId - the user to be followed ID
  * @throws {403} - If user is not logged in
  */
  router.put(
-  '/',
+  '/changefollow',
   [
     userValidator.isUserLoggedIn,
     userValidator.isUsernameExists

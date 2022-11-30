@@ -169,7 +169,7 @@ class FreetCollection {
    * @return {Promise<Array<HydratedDocument<Freet>>>} - Subset of freets according to taba rules
    */
   static async chooseTab(userId: string | Types.ObjectId, tabType: string, sortType: string = "hot"): Promise<Array<HydratedDocument<Freet>>> {
-    let user: User = await UserCollection.findOneByUserId(userId);
+    let user = await UserCollection.findOneByUserId(userId);
     let date: Date = new Date();
     let weekAgo: Date = new Date(date.getTime() - oneWeek);
     if (tabType === "home") {
@@ -196,6 +196,7 @@ class FreetCollection {
       }
       return this.sortType(mixedFreets, sortType);
     }
+    await 
   }
 
   /**
@@ -253,7 +254,8 @@ class FreetCollection {
       freet.flag = false;
       freet.cover = "none";
     }
-    
+    await freet.save();
+    await user.save();
   }
   /**
    * Report a freet as "spam", "misinformation", or "triggering", setting off an audit if enough reports are made
@@ -277,6 +279,7 @@ class FreetCollection {
         }
       }
     }
+    await freet.save();
   }
 
   /**
@@ -313,6 +316,7 @@ class FreetCollection {
         freet.cover = "triggering";
       }
     }
+    await freet.save();
   }
 
   /**
@@ -324,8 +328,7 @@ class FreetCollection {
    */
   static async updateOne(freetId: Types.ObjectId | string, content: string): Promise<HydratedDocument<Freet>> {
     const freet = await FreetModel.findOne({_id: freetId});
-    freet.content = content;
-    freet.dateModified = new Date();
+    freet.updateOne({_id: freetId}, {$set: {"content": content, "dateModified": new Date()}});
     await freet.save();
     return freet.populate('authorId');
   }

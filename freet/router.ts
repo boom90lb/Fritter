@@ -132,17 +132,21 @@ router.put(
 );
 
 /**
+ * NEW QUERIES
+ */
+
+/**
  * Get freets by tabType and sortType.
  *
- * @name GET /api/freets?tabType=type
+ * @name GET /api/freets/sort?tabType=type?sortType=type
  *
  * @return {FreetResponse[]} - An array of freets to display in feed
  */
  router.get(
-  '/',
+  '/sort',
   async (req: Request, res: Response, next: NextFunction) => {
-    // Check if authorId query parameter was supplied
-    if (req.query.tabType !== undefined) {
+    // Check if tabType and sortType query parameter was supplied
+    if ((req.query.tabType !== undefined) || (req.query.sortType !== undefined)) {
       next();
       return;
     }
@@ -156,7 +160,7 @@ router.put(
 /**
  * Vote on a freet
  *
- * @name PUT /api/freets/:id
+ * @name PUT /api/freets/vote/:id
  *
  * @param {string} voteType - upvote or downvote
  * @return {FreetResponse} - the updated freet
@@ -164,13 +168,13 @@ router.put(
  * @throws {404} - if the freetId is not valid
  */
  router.put(
-  '/:freetId?',
+  '/vote/:freetId?',
   [
     userValidator.isUserLoggedIn,
     freetValidator.isFreetExists
   ],
   async (req: Request, res: Response) => {
-    await FreetCollection.vote(req.params.freetId, req.params.userId, req.params.voteType);
+    await FreetCollection.vote(req.params.freetId, req.query.userId as string, req.query.voteType as string);
     res.status(200).json({
       message: 'Your vote has been recorded.'
     });
@@ -180,7 +184,7 @@ router.put(
 /**
  * Report a freet
  *
- * @name PUT /api/freets/:id
+ * @name PUT /api/freets/report/:id
  *
  * @param {string} freetId - id of freet
  * @param {string} reportType - 'spam' or 'triggering' or 'misinformation' report
@@ -188,13 +192,13 @@ router.put(
  * @throws {404} - if the freetId is not valid
  */
  router.put(
-  '/:freetId?',
+  '/report/:freetId?',
   [
     userValidator.isUserLoggedIn,
     freetValidator.isFreetExists
   ],
   async (req: Request, res: Response) => {
-    await FreetCollection.report(req.params.freetId, req.params.reportType);
+    await FreetCollection.report(req.params.freetId, req.query.reportType as string);
     res.status(200).json({
       message: 'Your report has been recorded.'
     });
@@ -202,9 +206,9 @@ router.put(
 );
 
 /**
- * Report a freet
+ * Audit a freet
  *
- * @name PUT /api/freets/:id
+ * @name PUT /api/freets/auditvote/:id
  *
  * @param {string} freetId - id of freet
  * @param {string} confirm - confirm if freet should be moderated
@@ -212,13 +216,13 @@ router.put(
  * @throws {404} - if the freetId is not valid
  */
  router.put(
-  '/:freetId?',
+  '/auditvote/:freetId?',
   [
     userValidator.isUserLoggedIn,
     freetValidator.isFreetExists
   ],
   async (req: Request, res: Response) => {
-    await FreetCollection.auditVote(req.params.freetId, req.params.confirm == 'true' ? true : false);
+    await FreetCollection.auditVote(req.params.freetId, req.query.confirm == 'true' ? true : false);
     res.status(200).json({
       message: 'Your audit vote has been recorded.'
     });
