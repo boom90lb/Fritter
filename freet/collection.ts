@@ -139,15 +139,6 @@ class FreetCollection {
    * @return {Promise<HydratedDocument<Freet>[]>} - An array of freets sorted by criteria
    */
   static async sortType(freets: Array<HydratedDocument<Freet>>, sortType: string): Promise<Array<HydratedDocument<Freet>>> {
-
-    // let freets = await this.findSince(since);
-
-    // freets.filter(function(freet) {
-    //   return Math.abs(freet.dateCreated.getTime() - new Date().getTime()) <= twoWeeks;
-    // })
-
-    // let randArr = new Array(freets.length).fill(1).map((scalar, index) => ((Math.random()/2)+0.75)*(scalar+(index/freets.length)));
-
     if (sortType === 'best') {
       return freets.sort((f1, f2) => (f1.votes[0]-f1.votes[1]) > (f2.votes[0]-f2.votes[1]) ? -1 : 1);
     }
@@ -186,18 +177,36 @@ class FreetCollection {
     }
 
     else if (tabType === "discovery") {
-      let followingFreets = await this.findAllByFollowing(user.follows, weekAgo);
-      let notFollowingFreets = await this.findAllNotFollowing(user.follows, weekAgo);
-      let mixedFreets = []
+      let followingFreets = await FreetCollection.findAllByFollowing(user.follows, weekAgo);
+      let notFollowingFreets = await FreetCollection.findAllNotFollowing(user.follows, weekAgo);
+
+      let curNum1 = 0;
+      let usedNums1 = [];
+      let curNum2 = 0;
+      let usedNums2 = [];
+
+      let mixedFreets = [];
       for (let i = 0; i < notFollowingFreets.length; i++) {
         if (i%4 === 0) {
-          mixedFreets.push(notFollowingFreets[Math.floor(Math.random()*notFollowingFreets.length)])
+          curNum1 = Math.floor(Math.random()*notFollowingFreets.length);
+          if (!(curNum1 in usedNums1)) {
+            mixedFreets.push(notFollowingFreets[Math.floor(Math.random()*notFollowingFreets.length)]);
+            usedNums1.push(curNum1);
+          }
+
         }
         else {
-          mixedFreets.push(followingFreets[Math.floor(Math.random()*followingFreets.length)])
+          curNum2 = Math.floor(Math.random()*followingFreets.length);
+          if (!(curNum2 in usedNums2)) {
+            mixedFreets.push(followingFreets[Math.floor(Math.random()*followingFreets.length)]);
+            usedNums2.push(curNum2);
+          }
         }
       }
-      return await this.sortType(mixedFreets, sortType);
+      let cleanedMixedFreets = mixedFreets.filter(function(x) {
+        return x !== undefined;
+   });
+      return await this.sortType(cleanedMixedFreets, sortType);
     }
   }
 
