@@ -64,7 +64,7 @@ const isValidFreetModifier = async (req: Request, res: Response, next: NextFunct
  */
  const isAudited = async (req: Request, res: Response, next: NextFunction) => {
   if ((await FreetCollection.findOne(req.params.freetId)).audit !== "none") {
-    res.status(403).json({
+    res.status(405).json({
       error: 'Cannot audit vote on a freet not currently audited.'
     });
     return;

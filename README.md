@@ -313,3 +313,57 @@ This renders the `index.html` file that will be used to interact with the backen
 **Throws**
 
 - `403` if the user is not logged in
+
+#### `PUT /api/users/changefollow' - Add or remove user from follow list
+
+**Returns**
+
+- A success message for following or unfollowing a user
+
+**Throws**
+
+- `403` if the user is not logged in
+
+#### `POST /api/freets/:tabType?` - Change tab and sorting of feed
+
+**Returns**
+
+- An array of freets according to the tab and sorting type
+
+**Throws**
+
+- `403` if the user is not logged in
+
+#### `PUT /api/freets/vote/:id?` - Upvote or downvote a Freet
+
+**Returns**
+
+- A success message
+
+**Throws**
+
+- `403` if the user is not logged in
+- `404` if the freetId is invalid
+
+#### `PUT /api/freets/report/:id?` - Report a Freet for spam, misinformation, or offensiveness
+
+**Returns**
+
+- A success message
+
+**Throws**
+
+- `403` if the user is not logged in
+- `404` if the freetId is invalid
+
+#### `PUT /api/freets/auditvote/:freetId?` - Vote to remove or keep a post from deletion or suspension
+
+**Returns**
+
+- A success message
+
+**Throws**
+
+- `403` if the user is not logged in
+- `404` if the freetId is invalid
+- `405` if the Freet is not under audit

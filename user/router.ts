@@ -153,8 +153,6 @@ router.delete(
  * NEW QUERIES
  */
 
-//OK
-
 /**
  * Add/remove a follower.
  *

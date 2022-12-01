@@ -169,7 +169,7 @@ router.put(
 /**
  * Vote on a freet
  *
- * @name PUT /api/freets/vote/:id
+ * @name PUT /api/freets/vote/:id?
  *
  * @param {string} voteType - upvote or downvote
  * @return {FreetResponse} - the updated freet
@@ -195,7 +195,7 @@ router.put(
 /**
  * Report a freet
  *
- * @name PUT /api/freets/report/:id
+ * @name PUT /api/freets/report/:id?
  *
  * @param {string} freetId - id of freet
  * @param {string} reportType - 'spam' or 'triggering' or 'misinformation' report

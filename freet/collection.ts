@@ -299,6 +299,7 @@ class FreetCollection {
             freet.audit = "testing";
             freet.auditInfo.set("time_start", Date.now());
             freet.cover = _.max(Object.keys(freet.reports), i => freet.reports.get(i));
+            freet.status = freet.cover;
           }
         }
       }
