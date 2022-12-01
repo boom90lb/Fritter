@@ -1,4 +1,5 @@
 import type {HydratedDocument, Types} from 'mongoose';
+import mongoose from 'mongoose';
 import type {User} from './model';
 import UserModel from './model';
 
@@ -22,8 +23,8 @@ class UserCollection {
     const dateJoined: Date = new Date();
     const follows: Array<Types.ObjectId> = new Array();
     const followers: Array<Types.ObjectId> = new Array();
-    const votes: Map<Types.ObjectId, string> = new Map();
-    const reports: Map<Types.ObjectId, string> = new Map();
+    const votes: Map<string, string> = new Map();
+    const reports: Map<string, string> = new Map();
     let verified: boolean = false;
 
     const user = new UserModel({username, password, dateJoined, follows, followers, votes, reports, verified});
@@ -65,20 +66,26 @@ class UserCollection {
     });
   }
 
-  static async follow(userId: Types.ObjectId | string, followId: Types.ObjectId | string): Promise<number> {
+  static async follow(userId: Types.ObjectId | string, followId: string): Promise<number> {
     const user = await UserModel.findOne({_id: userId});
-    const following = await UserModel.findOne({_id: followId});
+    const following = await UserModel.findOne({username: followId});
 
     // user is already following, unfollow
-    if(user.follows.find(user => user === following._id)) {
-      UserModel.updateOne({user: userId}, {$pull: {follows: following._id}});
-      UserModel.updateOne({following: followId}, {$pull: {following: user._id}});
+    if(user.follows.includes(following._id)) {
+      //remove followed at index of element that has followId
+      user.follows.splice(user.follows.indexOf(following._id, 1));
+      //remove follower at index of element that has userId
+      following.followers.splice(following.followers.indexOf(user._id, 1));
+      user.save();
+      following.save();
       return 0;
     }
     // user doesn't follow yet, add to follows
     else{
-      UserModel.updateOne({user: userId}, {$addToSet: {follows: following._id}});
-      UserModel.updateOne({following: followId}, {$addToSet: {following: user._id}});
+      user.follows.push(following._id);
+      following.followers.push(user._id);
+      user.save();
+      following.save();
       return 1;
     }
   }
@@ -91,7 +98,7 @@ class UserCollection {
    * @return {Promise<HydratedDocument<User>>} - The updated user
    */
   static async updateOne(userId: Types.ObjectId | string, userDetails: any): Promise<HydratedDocument<User>> {
-    const user = await UserModel.findOne({_id: userId});
+    const user = await this.findOneByUserId(userId);
     if (userDetails.password) {
       user.password = userDetails.password as string;
     }

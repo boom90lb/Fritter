@@ -4,6 +4,7 @@ import FreetCollection from './collection';
 import * as userValidator from '../user/middleware';
 import * as freetValidator from '../freet/middleware';
 import * as util from './util';
+import mongoose from 'mongoose';
 
 const router = express.Router();
 
@@ -68,10 +69,10 @@ router.post(
   async (req: Request, res: Response) => {
     const userId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
     const freet = await FreetCollection.addOne(userId, req.body.content);
-
+    const freetResponse = await util.constructFreetResponse(freet);
     res.status(201).json({
       message: 'Your freet was created successfully.',
-      freet: util.constructFreetResponse(freet)
+      freet: freetResponse
     });
   }
 );
@@ -124,9 +125,10 @@ router.put(
   ],
   async (req: Request, res: Response) => {
     const freet = await FreetCollection.updateOne(req.params.freetId, req.body.content);
+    const freetResponse = await util.constructFreetResponse(freet);
     res.status(200).json({
       message: 'Your freet was updated successfully.',
-      freet: util.constructFreetResponse(freet)
+      freet: freetResponse
     });
   }
 );
@@ -138,21 +140,28 @@ router.put(
 /**
  * Get freets by tabType and sortType.
  *
- * @name GET /api/freets/sort?tabType=type?sortType=type
+ * @name POST /api/freets/:tabType?sortType=${fields.sortType}
  *
  * @return {FreetResponse[]} - An array of freets to display in feed
  */
- router.get(
-  '/sort',
+ router.post(
+  '/feed/:tabType?',
   async (req: Request, res: Response, next: NextFunction) => {
     // Check if tabType and sortType query parameter was supplied
-    if ((req.query.tabType !== undefined) || (req.query.sortType !== undefined)) {
+    if ((req.params.tabType !== undefined) && (req.query.sortType !== undefined)) {
       next();
       return;
     }
-
-    const matchingFreets = await FreetCollection.chooseTab(req.query.userId as string, req.query.tabType as string, req.query.sortType="hot" as string);
-    const response = matchingFreets.map(util.constructFreetResponse);
+    const defaultFeed = await FreetCollection.chooseTab(req.session.userId as string, "home", "best");
+    const response = await Promise.all(defaultFeed.map(util.constructFreetResponse));
+    res.status(200).json(response);
+  },
+  [
+    userValidator.isUserLoggedIn
+  ],
+  async (req: Request, res: Response) => {
+    const matchingFreets = await FreetCollection.chooseTab(req.session.userId as string, req.params.tabType, req.query.sortType as string);
+    const response = await Promise.all(matchingFreets.map(util.constructFreetResponse));
     res.status(200).json(response);
   }
 );
@@ -174,9 +183,11 @@ router.put(
     freetValidator.isFreetExists
   ],
   async (req: Request, res: Response) => {
-    await FreetCollection.vote(req.params.freetId, req.query.userId as string, req.query.voteType as string);
+    await FreetCollection.vote(req.params.freetId, req.session.userId, req.query.voteType as string);
+    let freetResponse = util.constructFreetResponse(await FreetCollection.findOne(req.params.freetId));
     res.status(200).json({
-      message: 'Your vote has been recorded.'
+      message: 'Your vote has been recorded.',
+      freet: freetResponse
     });
   }
 );
@@ -198,9 +209,11 @@ router.put(
     freetValidator.isFreetExists
   ],
   async (req: Request, res: Response) => {
-    await FreetCollection.report(req.params.freetId, req.query.reportType as string);
+    await FreetCollection.report(req.params.freetId, req.session.userId, req.query.reportType as string);
+    let freetResponse = util.constructFreetResponse(await FreetCollection.findOne(req.params.freetId));
     res.status(200).json({
-      message: 'Your report has been recorded.'
+      message: 'Your report has been recorded.',
+      freet: freetResponse
     });
   }
 );
@@ -219,12 +232,15 @@ router.put(
   '/auditvote/:freetId?',
   [
     userValidator.isUserLoggedIn,
-    freetValidator.isFreetExists
+    freetValidator.isFreetExists,
+    freetValidator.isAudited
   ],
   async (req: Request, res: Response) => {
     await FreetCollection.auditVote(req.params.freetId, req.query.confirm == 'true' ? true : false);
+    let freetResponse = util.constructFreetResponse(await FreetCollection.findOne(req.params.freetId));
     res.status(200).json({
-      message: 'Your audit vote has been recorded.'
+      message: 'Your audit vote has been recorded.',
+      freet: freetResponse
     });
   }
 );

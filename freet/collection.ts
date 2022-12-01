@@ -2,8 +2,8 @@ import {HydratedDocument, Types} from 'mongoose';
 import type {Freet} from './model';
 import FreetModel from './model';
 import UserCollection from '../user/collection';
-import { userRouter } from 'user/router';
-import UserModel, { User } from 'user/model';
+import { userRouter } from '../user/router';
+import UserModel, { User } from '../user/model';
 import _ from 'lodash';
 
 const oneDay = 8.64e+7;
@@ -122,8 +122,11 @@ class FreetCollection {
     const freets = await this.findSince(date);
     const retFreets = [];
     for (let i = 0; i < freets.length; i++) {
-      if ((await UserCollection.findOneByUserId(freets[i]._id)).verified) {
-        retFreets.push(freets[i]);
+      let singleFreet = await UserCollection.findOneByUserId(freets[i]._id);
+      if (singleFreet) {
+        if (singleFreet.verified) {
+          retFreets.push(freets[i]);
+        }
       }
     }
     return retFreets;
@@ -174,19 +177,19 @@ class FreetCollection {
     let weekAgo: Date = new Date(date.getTime() - oneWeek);
     if (tabType === "home") {
       let followingFreets = await this.findAllByFollowing(user.follows, weekAgo);
-      return this.sortType(followingFreets, sortType);
+      return await this.sortType(followingFreets, sortType);
     }
 
     else if (tabType === "verified") {
       let verifiedFreets = await this.findVerified(weekAgo);
-      return this.sortType(verifiedFreets, sortType);
+      return await this.sortType(verifiedFreets, sortType);
     }
 
     else if (tabType === "discovery") {
       let followingFreets = await this.findAllByFollowing(user.follows, weekAgo);
       let notFollowingFreets = await this.findAllNotFollowing(user.follows, weekAgo);
       let mixedFreets = []
-      for (let i = 0; i < followingFreets.length; i++) {
+      for (let i = 0; i < notFollowingFreets.length; i++) {
         if (i%4 === 0) {
           mixedFreets.push(notFollowingFreets[Math.floor(Math.random()*notFollowingFreets.length)])
         }
@@ -194,9 +197,8 @@ class FreetCollection {
           mixedFreets.push(followingFreets[Math.floor(Math.random()*followingFreets.length)])
         }
       }
-      return this.sortType(mixedFreets, sortType);
+      return await this.sortType(mixedFreets, sortType);
     }
-    await 
   }
 
   /**
@@ -208,21 +210,21 @@ class FreetCollection {
   static async vote(freetId: Types.ObjectId | string, userId: Types.ObjectId | string, voteType: string): Promise<void> {
     const freet = await FreetModel.findOne({_id: freetId});
     const user = await UserModel.findOne({_id: userId});
-    const userVote: string | undefined = user.votes.get(freet._id);
+    const userVote: string | undefined = user.votes.get(freet._id.toString());
     if (voteType === "upvote") {
       if (userVote) { 
         if (userVote === "upvote") {
-          user.votes.delete(freet._id);
+          user.votes.delete(freet._id.toString());
           freet.votes[0] -= 1;
         }
         if (userVote === "downvote") {
-          user.votes.set(freet._id, "upvote");
+          user.votes.set(freet._id.toString(), "upvote");
           freet.votes[0] += 1;
           freet.votes[1] -= 1;
         }
       }
       else {
-        user.votes.set(freet._id, "upvote");
+        user.votes.set(freet._id.toString(), "upvote");
         freet.votes[0] += 1;        
       }
     }
@@ -230,16 +232,16 @@ class FreetCollection {
     if (voteType === "downvote") {
       if (userVote) { 
         if (userVote === "upvote") {
-          user.votes.set(freet._id, "downvote");
+          user.votes.set(freet._id.toString(), "downvote");
           freet.votes[0] -= 1;
           freet.votes[1] += 1;
         }
         if (userVote === "downvote") {
-          user.votes.delete(freet._id);
+          user.votes.delete(freet._id.toString());
           freet.votes[1] -= 1;
         }
         else {
-          user.votes.set(freet._id, "downvote");
+          user.votes.set(freet._id.toString(), "downvote");
           freet.votes[1] += 1;        
         }
       }
@@ -262,24 +264,39 @@ class FreetCollection {
    * @param freetId - The id of the freet to find
    * @param reportType - Type of report
    */
-  static async report(freetId: Types.ObjectId | string, reportType: string): Promise<void> {
+  static async report(freetId: Types.ObjectId | string, userId: Types.ObjectId | string, reportType: string): Promise<void> {
     const freet = await FreetModel.findOne({_id: freetId});
+    const user = await UserModel.findOne({_id: userId});
     const reportVal = freet.reports.get(reportType);
     
     if (freet.audit === "none") {
-      freet.reports.set(reportType, reportVal+1);
+      if (user.reports.get(freet._id.toString())) {
+        user.reports.delete(freet._id.toString());
+        freet.reports.set(user.reports.get(freet._id.toString()), reportVal-1);
+      }
 
-      let reports = freet.reports;
-
-      if (freet.votes[1] > 10) {
-        if (_.sum(_.values(reports)) > freet.votes[1]/10) {
-          freet.audit = "testing";
-          freet.auditInfo.set("time_start", Date.now());
-          freet.cover = _.max(Object.keys(reports), i => reports.get(i));
+      else {
+        freet.reports.set(reportType, reportVal+1);
+        user.reports.set(freet._id.toString(), reportType);
+        
+        //sum total reports of the freet
+        let totalReports = 0;
+        freet.reports.forEach(report => {
+          totalReports += report;
+        });
+  
+        if (freet.votes[1] > 10) {
+          if (totalReports > freet.votes[1]/10) {
+            freet.audit = "testing";
+            freet.auditInfo.set("time_start", Date.now());
+            freet.cover = _.max(Object.keys(freet.reports), i => freet.reports.get(i));
+          }
         }
       }
+
     }
     await freet.save();
+    await user.save();
   }
 
   /**

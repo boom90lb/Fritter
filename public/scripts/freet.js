@@ -35,14 +35,8 @@ function deleteFreet(fields) {
     .catch(showResponse);
 }
 
-function chooseTab(fields) {
-  fetch(`/api/freets/sort?author=${fields.author}?tabType=${fields.tabType}&sortType=${fields.sortType}`, {method: 'GET', body: JSON.stringify(fields), headers: {'Content-Type': 'application/json'}})
-    .then(showResponse)
-    .catch(showResponse);
-}
-
 function vote(fields) {
-  fetch(`/api/freets/vote/${fields.id}?author=${fields.author}&voteType=${fields.voteType}`, {method: 'PUT', body: JSON.stringify(fields), headers: {'Content-Type': 'application/json'}})
+  fetch(`/api/freets/vote/${fields.id}?voteType=${fields.voteType}`, {method: 'PUT', body: JSON.stringify(fields), headers: {'Content-Type': 'application/json'}})
     .then(showResponse)
     .catch(showResponse);
 }
@@ -55,6 +49,12 @@ function report(fields) {
 
 function auditVote(fields) {
   fetch(`/api/freets/auditvote/${fields.id}?confirm=${fields.confirm}`, {method: 'PUT', body: JSON.stringify(fields), headers: {'Content-Type': 'application/json'}})
+    .then(showResponse)
+    .catch(showResponse);
+}
+
+function chooseTab(fields) {
+  fetch(`/api/freets/feed/${fields.tabType}?sortType=${fields.sortType}`, {method: 'POST', body: JSON.stringify(fields), headers: {'Content-Type': 'application/json'}})
     .then(showResponse)
     .catch(showResponse);
 }

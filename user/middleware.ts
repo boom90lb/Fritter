@@ -85,27 +85,33 @@ const isAccountExists = async (req: Request, res: Response, next: NextFunction) 
  * Checks if a username in req.body is already in use
  */
 const isUsernameNotAlreadyInUse = async (req: Request, res: Response, next: NextFunction) => {
-  const user = await UserCollection.findOneByUsername(req.body.username);
+  if (req.body.username) {
+    const user = await UserCollection.findOneByUsername(req.body.username);
 
-  // If the current session user wants to change their username to one which matches
-  // the current one irrespective of the case, we should allow them to do so
-  if (!user || (user?._id.toString() === req.session.userId)) {
-    next();
+    // If the current session user wants to change their username to one which matches
+    // the current one irrespective of the case, we should allow them to do so
+    if (!user || (user?._id.toString() === req.session.userId)) {
+      next();
+      return;
+    }
+
+    res.status(409).json({
+      error: {
+        username: 'An account with this username already exists.'
+      }
+    });
+  }
+  else {
     return;
   }
 
-  res.status(409).json({
-    error: {
-      username: 'An account with this username already exists.'
-    }
-  });
 };
 
 /**
  * Checks if a username in req.body exists
  */
  const isUsernameExists = async (req: Request, res: Response, next: NextFunction) => {
-  const user = await UserCollection.findOneByUsername(req.query.followId as string);
+  const user = await UserCollection.findOneByUsername(req.params.followId as string);
 
   // If the current session user wants to change their username to one which matches
   // the current one irrespective of the case, we should allow them to do so

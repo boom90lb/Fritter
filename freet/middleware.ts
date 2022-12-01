@@ -59,8 +59,23 @@ const isValidFreetModifier = async (req: Request, res: Response, next: NextFunct
   next();
 };
 
+/**
+ * Checks if freet is under audit
+ */
+ const isAudited = async (req: Request, res: Response, next: NextFunction) => {
+  if ((await FreetCollection.findOne(req.params.freetId)).audit !== "none") {
+    res.status(403).json({
+      error: 'Cannot audit vote on a freet not currently audited.'
+    });
+    return;
+  }
+
+  next();
+};
+
 export {
   isValidFreetContent,
   isFreetExists,
-  isValidFreetModifier
+  isValidFreetModifier,
+  isAudited
 };

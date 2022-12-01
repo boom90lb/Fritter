@@ -14,8 +14,8 @@ export type User = {
   dateJoined: Date;
   follows: Array<Types.ObjectId>;
   followers: Array<Types.ObjectId>;
-  votes: Map<Types.ObjectId, string>;
-  reports: Map<Types.ObjectId, string>;
+  votes: Map<string, string>;
+  reports: Map<string, string>;
   verified: boolean
 };
 
@@ -49,27 +49,15 @@ const UserSchema = new Schema({
     required: false
   }],
   // All freet votes that the user has made
-  votes: [{
-    freetId: {
-      type: String,
-      required: false
-    },
-    voteType: {
-      type: String,
-      required: false
-    }
-  }],
+  votes: {
+    type: Map,
+    of: String
+  },
   // All freet reports that the user has made
-  reports: [{
-    freetId: {
-      type: String,
-      required: false
-    },
-    reportType: {
-      type: String,
-      required: false
-    }
-  }],
+  reports: {
+    type: Map,
+    of: String
+  },
   verified: {
     type: Boolean,
     required: true

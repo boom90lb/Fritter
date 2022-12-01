@@ -40,7 +40,7 @@ function signOut() {
 }
 
 function follow(fields) {
-  fetch('/api/users/changefollow', {method: 'PUT', body: JSON.stringify(fields), headers: {'Content-Type': 'application/json'}})
+  fetch(`/api/users/changefollow/${fields.followId}`, {method: 'PUT', body: JSON.stringify(fields), headers: {'Content-Type': 'application/json'}})
     .then(showResponse)
     .catch(showResponse);
 }

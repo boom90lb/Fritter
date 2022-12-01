@@ -10,8 +10,8 @@ type UserResponse = {
   dateJoined: string;
   follows: Array<Types.ObjectId>;
   followers: Array<Types.ObjectId>;
-  votes: Map<Types.ObjectId, string>;
-  reports: Map<Types.ObjectId, string>;
+  votes: Map<string, string>;
+  reports: Map<string, string>;
   verified: boolean;
 };
 

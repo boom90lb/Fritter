@@ -153,6 +153,8 @@ router.delete(
  * NEW QUERIES
  */
 
+//OK
+
 /**
  * Add/remove a follower.
  *
@@ -163,22 +165,22 @@ router.delete(
  * @throws {403} - If user is not logged in
  */
  router.put(
-  '/changefollow',
+  '/changefollow/:followId?',
   [
     userValidator.isUserLoggedIn,
     userValidator.isUsernameExists
   ],
   async (req: Request, res: Response) => {
     const userId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
-    const followId = (req.query.followId as string) ?? '';
+    const followId = (req.params.followId as string) ?? '';
     let response: string | number = await UserCollection.follow(userId, followId);
 
     if (response === 0) {
-      response = "followed";
+      response = "unfollowed";
     }
 
     if (response === 1) {
-      response = "unfollowed";
+      response = "followed";
     }
     res.status(200).json({
       message: `You have ${response} ${followId}`

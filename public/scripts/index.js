@@ -53,6 +53,7 @@ function init() {
     form.onsubmit = e => {
       e.preventDefault();
       const formData = new FormData(form);
+      console.log(form.innerHTML);
       handler(Object.fromEntries(formData.entries()));
       return false; // Don't reload page
     };

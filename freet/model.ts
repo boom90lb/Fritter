@@ -76,10 +76,10 @@ const FreetSchema = new Schema<Freet>({
     required: true
   }],
   // Reports, index 0 == spam, index 1 == misleading, index 2 == offensive
-  reports: [{
-    type: Number,
-    required: true
-  }],
+  reports: {
+    type: Map,
+    of: Number
+  },
   // If dislikes > likes, flag is true, marking as controversial
   flag: {
     type: Boolean,
@@ -96,10 +96,10 @@ const FreetSchema = new Schema<Freet>({
     required: true
   },
   // Votes for audit, index 0 == vote to remove, index 1 == vote to keep, index 2 == ms since start
-  auditInfo: [{
-    type: Number,
-    required: true
-  }],
+  auditInfo: {
+    type: Map,
+    of: Number
+  },
   cover: {
     type: String,
     required: true

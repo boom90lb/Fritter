@@ -121,8 +121,8 @@
         <form id="follow">
           <h3>Follow User</h3>
           <div>
-            <label for="username">Username:</label>
-            <input id="username" name="username">
+            <label for="followId">Username:</label>
+            <input id="followId" name="followId">
           </div>
           <input type="submit" value="Follow">
         </form>
@@ -134,8 +134,8 @@
             <input id="id" name="id">
           </div>
           <div>
-            <label for="vote">Vote:</label>
-            <select id="vote" name="vote">
+            <label for="voteType">Vote:</label>
+            <select id="voteType" name="voteType">
               <option value="upvote">Upvote</option>
               <option value="downvote">Downvote</option>
             </select>
@@ -150,8 +150,8 @@
             <input id="id" name="id">
           </div>
           <div>
-            <label for="report">Report:</label>
-            <select id="report" name="report">
+            <label for="reportType">Report:</label>
+            <select id="reportType" name="reportType">
               <option value="spam">Spam</option>
               <option value="misinformation">Misinformation</option>
               <option value="triggering">Triggering</option>
@@ -185,8 +185,8 @@
               <option value="verified">Verified</option>
               <option value="discovery">Discovery</option>
             </select>
-            <input type="submit" value="Choose Tab">
-
+          </div>
+          <div>
             <label for="sortType">Sort Type:</label>
             <select id="sortType" name="sortType">
               <option value="best">Best</option>
@@ -194,9 +194,10 @@
               <option value="rising">Rising</option>
               <option value="new">New</option>
             </select>
-            <input type="submit" value="Sort">
+            <input type="submit" value="Generate Feed">
           </div>
         </form>
+
       </div>
     </section>
     <section>
